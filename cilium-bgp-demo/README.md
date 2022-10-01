@@ -4,7 +4,20 @@ _See the pre-req of the needed tools [here](https://docs.cilium.io/en/v1.12/gett
 
 _We're using v1.12.2 of Cilium in this demo._
 
-## Quick start
+## Demo overview
+
+This demo shows how to use the built-in BGP control plane feature in Cilium, this was added [here](https://github.com/cilium/cilium/pull/18860) in the `v1.12.0` release on the 20:th of July 2022. Today there's a bunch of different guides that you can follow to advertise IP ranges assigned and handled by Cilium:
+* Use BIRD
+* Use kube-router
+* Use the older BGP implementation within Cilium that utilized MetalLB.
+* Enable BGP control plane
+
+# TODO: Continue here!
+There's no clear road map on where the BGP control plane feature will be at in the future, i
+
+The BGP control plane feature is toggled by adding the following flag to the `cilium` agent: `--enable-bgp-control-plane=true`. What this does under the hood is to start a controller that listens for `CiliumBGPPeeringPolicy` CRDs. The BGP control plane is using the `gobgp` API to handle all BGP logic.
+
+# How-to
 1. Create cluster
 ```
 kind create cluster --config=cilium-bgp-cluster.yaml
@@ -19,7 +32,7 @@ helm repo update
 3. Pre-load the `cilium` images into the `kind` cluster nodes:
 ```
 docker pull quay.io/cilium/cilium:v1.12.2
-kind load docker-image quay.io/cilium/cilium:v1.12.2
+kind load docker-image quay.io/cilium/cilium:v1.12.2 --name cilium-bgp-cluster
 ```
 4. Install `cilium`:
 ```
@@ -29,3 +42,7 @@ helm install cilium cilium/cilium --version 1.12.2 \
    --set ipam.mode=kubernetes \
    --set bgpControlPlane.enabled=true
 ```
+5. Start a `gobgpd` container in the same network as the `kind` cluster created above, default network is `kind`:
+```
+docker run --network kind --name gobgpd
+``` 
