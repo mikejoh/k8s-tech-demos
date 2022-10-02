@@ -67,3 +67,4 @@ _You'll run `gobgp` locally since we've exposed the gRPC port, it assumes that t
 
 ### TODO
 * Make the BGP configuration a bit more predictable with all the Docker network assigned IP addresses. Right now i've assumed a bunch of things in the config.
+* Investigate if there's a possibility to increase the Cilium BGP reconcile loop to retry against disconnected peers more often.
