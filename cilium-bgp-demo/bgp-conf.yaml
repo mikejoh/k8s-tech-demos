@@ -1,0 +1,16 @@
+global:
+  config:
+    as: 65130
+    router-id: 172.18.0.6
+    port: 179
+
+peer-groups:
+  config:
+    peer-group-name: cilium-nodes
+    peer-as: 65131
+    auth-password: "password"
+
+dynamic-neighbors:
+  config:
+    prefix: 172.18.0.0/16
+    peer-group: cilium-nodes
