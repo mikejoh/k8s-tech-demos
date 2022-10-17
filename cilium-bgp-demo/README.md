@@ -54,6 +54,7 @@ docker build . -t gobgpd:v3.7.0
 docker run --rm --network kind -v $(pwd)/bgp-conf.yaml:/bgp-conf.yaml -p 50051:50051 --name gobgpd -it gobgpd:v3.7.0
 ``` 
 _Note that the container is started in interactive mode so you'll see the logs from `gobgpd`. The log level is `debug`._
+
 7. Apply the Cilium BGP peering policy and check the logs of `cilium-agent` and `gobgpd`. The nodes shall start to peer with `gobgpd` and announce their PodCIDRs. To verify that this has happened use the `gobgp` CLI tool to check the status of neighbors aswell as the routing information:
 ```
 kubectl apply -f cilium-bgp-peering-policy.yaml
