@@ -1,10 +1,8 @@
-# Kubernetes tools and technology demos
+# Demos of various tools and technologies using `kind`
 
 :mage_man:
 
-This repository contains various demos that showcases vaious Kubernetes-native tools and technology.
+## Demo list
 
-## Available demos
-
-* Tekton
-* Cilium (+BGP)
+* [Tekton](https://github.com/mikejoh/k8s-tech-demos/tree/main/tekton-demo)
+* [Cilium (+BGP)](https://github.com/mikejoh/k8s-tech-demos/tree/main/cilium-bgp-demo)
