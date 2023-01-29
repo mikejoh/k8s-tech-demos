@@ -1,45 +1,52 @@
 # tekton-demo
 
+## Versions
+
+* `kind` - `v0.17.0`
+* Tekton `pipeline` - Latest (installed via `kubectl`)
+* `tkn` - `v0.29.0` (Tekton CLI)
+
 ## Quick start
-1. Create cluster
+1. Create a Tekton demo cluster
 ```
-kind create cluster --config=tekton-cluster --image=kindest/node:v1.22.5
+kind create cluster --config=tekton-cluster.yaml --image=kindest/node:v1.25.3
 ```
+
 2. Install nginx controller
 ```
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+```
 
-# Wait for nginx controller Pod to be Ready
+Wait for nginx controller Pod to be `Ready`:
+```
 kubectl wait --namespace ingress-nginx \
   --for=condition=ready pod \
   --selector=app.kubernetes.io/component=controller \
   --timeout=90s
 ```
+
 3. Install the Tekton CLI `tkn`
 ```
-curl -LO https://github.com/tektoncd/cli/releases/download/v0.22.0/tkn_0.22.0_Linux_x86_64.tar.gz
-tar xzvf tkn_0.22.0_Linux_x86_64.tar.gz
+curl -LO https://github.com/tektoncd/cli/releases/download/v0.29.0/tkn_0.29.0_Linux_x86_64.tar.gz
+tar xzvf tkn_0.29.0_Linux_x86_64.tar.gz
 sudo mv tkn /usr/local/bin
-```
-4. Install Tekton
-```
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+rm -f tkn_0.29.0_Linux_x86_64.tar.gz
 ```
 
-## Create and start a `Task`:
-1. Create the demo hello world task:
+4. Install Tekton
 ```
-kubectl apply -f task-hello.yaml
+kubectl apply -f https://storage.googleapis.com/tekton-reqleases/pipeline/latest/release.yaml
 ```
-2. Start the task:
+
+5. Install the Tekton Dashboard (read-only, see [this](https://tekton.dev/docs/dashboard/install/) link for more info):
 ```
-tkn task start hello
+kubectl apply -f https://storage.googleapis.com/tekton-releases/dashboard/latest/release.yaml
 ```
-3. Display the last run `Task` logs:
+
+6. Port-forward and browse to the Tekton Dashboard:
 ```
-tkn taskrun logs --last -f
+kubectl port-forward -n tekton-pipelines svc/tekton-dashboard 9097:9097
 ```
-This should output something like:
-```
-[hello] Hello World!
-```
+and now browse to: http://localhost:9097
+
+7. Complete the official getting started guides [here](https://tekton.dev/docs/getting-started/)!
