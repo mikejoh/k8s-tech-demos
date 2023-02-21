@@ -6,3 +6,4 @@
 
 * [Tekton](https://github.com/mikejoh/k8s-tech-demos/tree/main/tekton-demo)
 * [Cilium (+BGP)](https://github.com/mikejoh/k8s-tech-demos/tree/main/cilium-bgp-demo)
+* [Kyverno](https://github.com/mikejoh/k8s-tech-demos/tree/main/kyverno-demo)
