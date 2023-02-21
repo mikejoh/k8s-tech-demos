@@ -1,5 +1,10 @@
 # kyverno-demo
 
+## Versions
+
+* `kyverno` - `2.7.0`
+* `kyverno` CLI - `
+
 ## Quick start
 
 1. Create a `kyverno` cluster:
@@ -41,14 +46,15 @@ This will show you the status of the policy, if you list the Policy reports in e
 kubectl delete -f pod.yaml
 kubectl apply -f policies/require-labels.yaml
 ```
+
 7. Re-apply the Pod manifest and check the returning error:
 ```
 kubectl apply -f pod.yaml
 ```
 
-You can also download the `kyverno` CLI tool and run a check using a policy against a resource before you apply the manifest, a good use case for this is as a pre-validation step in CI/CD pipelines.
+You can also download the `kyverno` CLI tool and run a check using a policy against a resource before you apply the manifest, a good use case for this is as a pre-validation step in CI/CD pipelines. _Please note that there's a `kubectl` plugin available for `kyverno`, this can be installed with `kubectl krew install kyverno`._
 
-If you download the CLI you can run the following to see what the result would be using the policy we're using in this demo:
+If you download the CLI (or the `kubectl` plugin) you can run the following to see what the result would be using the policy we're using in this demo:
 ```
 kyverno apply policies/require-labels.yaml --resource pod.yaml
 ```
