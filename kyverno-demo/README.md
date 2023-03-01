@@ -2,8 +2,8 @@
 
 ## Versions
 
-* `kyverno` - `2.7.0`
-* `kyverno` CLI - `
+* `kyverno` - `1.9.0` (installed as part of the `2.7.0` helm chart)
+* `kyverno` CLI, as a `kubectl` plugin - `1.9.0`
 
 ## Quick start
 
@@ -72,6 +72,12 @@ To check Policy reports in all namespaces to get an overview of what and where y
 ```
 kubectl get policyreports.wgpolicyk8s.io -A
 ```
+
+## Policy Reporter
+
+There's an UI component (and more) available through the [`policy-reporter`](https://github.com/kyverno/policy-reporter) developed by the Kyverno folks. The UI gives you a great overview and ability to explore policies and their statuses. See the repo for install instructions using helm.
+
+_Note that there's a sqlite DB backing the `policy-reporter` and it's mounted into a `emptyDir` (!). This is OK, since does not need persistent volumes, see [this](https://github.com/kyverno/policy-reporter/issues/129) issue._
 
 ## Policies
 
