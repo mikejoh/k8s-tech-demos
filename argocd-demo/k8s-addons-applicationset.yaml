@@ -5,23 +5,23 @@ metadata:
   namespace: argocd
 spec:
   generators:
-  - git:
-      repoURL: https://github.com/mikejoh/argocd-poc.git
-      revision: HEAD
-      directories:
-      - path: k8s-addons/*
+    - git:
+        repoURL: https://github.com/mikejoh/k8s-apps.git
+        revision: main
+        directories:
+          - path: charts/*
   template:
     metadata:
-      name: '{{path[0]}}'
+      name: "{{ path[0] }}"
     spec:
       project: default
       source:
-        repoURL: https://github.com/mikejoh/argocd-poc.git
-        targetRevision: HEAD
-        path: '{{path}}'
+        repoURL: https://github.com/mikejoh/k8s-apps.git
+        targetRevision: "{{ revision }}"
+        path: "{{path}}"
       destination:
         name: kind-downstream-cluster
-        namespace: '{{path.basename}}'
+        namespace: "{{ path.basename }}"
       syncPolicy:
         automated:
           prune: true
@@ -29,4 +29,3 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
-

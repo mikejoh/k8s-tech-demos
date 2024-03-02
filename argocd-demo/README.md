@@ -24,13 +24,13 @@ argocd admin initial-password -n argocd
 
 5. Login to the ArgoCD UI:
 ```
-kubectl port-forward svc/argocd-server -n argocd 8080:443
+kubectl port-forward svc/argocd-server -n argocd 4443:443
 ```
-Browse to `http://localhost:8080`.
+Browse to `https://localhost:4443`.
 
 6. Login, using the `argocd` CLI, to the local ArgoCD cluster (make sure that the port-forward is active):
 ```
-argocd login localhost:8080
+argocd login localhost:4443
 ```
 Use `admin` and the password from step 5.
 
@@ -47,10 +47,11 @@ Now run:
 kubectl config use-context kind-argocd-cluster
 argocd cluster add kind-downstream-cluster
 ``` 
-to add the cluster using details from the `kind-downstream-cluster` context in your local kubeconfig. Browse to https://localhost:8080/settings/clusters to see the newly added cluster.
+to add the cluster using details from the `kind-downstream-cluster` context in your local kubeconfig. Browse to https://localhost:4443/settings/clusters to see the newly added cluster.
 
 8. Deploy the provided `ApplicationSet`:
 ```
-kubectl config use-context kind-argocd-cluster
-kubectl apply -f k8s-addons-applicationset.yaml
+argocd appset create k8s-addons-applicationset.yaml --upsert
 ```
+
+9. Browse to the ArgoCD UI to see the status.
