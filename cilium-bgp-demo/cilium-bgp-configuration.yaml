@@ -1,0 +1,54 @@
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPAdvertisement
+metadata:
+  name: pod-cidr
+  namespace: kube-system
+  labels:
+    advertise: pod-cidr
+spec:
+  advertisements:
+    - advertisementType: "PodCIDR"
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPClusterConfig
+metadata:
+  name: cilium-gobgpd
+spec:
+  bgpInstances:
+    - name: "gobgpd"
+      localASN: 65131
+      peers:
+        - name: "gobgpd-docker"
+          peerASN: 65130
+          peerAddress: 172.19.0.6
+          peerConfigRef:
+            name: "bgp-peer-config"
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPPeerConfig
+metadata:
+  name: bgp-peer-config
+  namespace: kube-system
+spec:
+  timers:
+    holdTimeSeconds: 15
+    keepAliveTimeSeconds: 5
+  authSecretRef: bgp-auth-secret
+  gracefulRestart:
+    enabled: true
+    restartTimeSeconds: 15
+  families:
+    - afi: ipv4
+      safi: unicast
+      advertisements:
+        matchLabels:
+          advertise: "pod-cidr"
+---
+apiVersion: v1
+data:
+  password: cGFzc3dvcmQ=
+kind: Secret
+metadata:
+  name: bgp-auth-secret
+  namespace: kube-system

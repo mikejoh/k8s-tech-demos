@@ -1,15 +1,15 @@
 global:
   config:
     as: 65130
-    router-id: 172.18.0.6
+    router-id: 172.19.0.6
     port: 179
     local-address-list:
-      - "172.18.0.6"
+      - "172.19.0.6"
 
 peer-groups:
   transport:
     config:
-      local-address: "172.18.0.6"
+      local-address: "172.19.0.6"
   config:
     peer-group-name: cilium-nodes
     peer-as: 65131
@@ -18,6 +18,6 @@ peer-groups:
 
 dynamic-neighbors:
   config:
-    prefix: 172.18.0.0/16
+    prefix: 172.19.0.0/16
     peer-group: cilium-nodes
 
