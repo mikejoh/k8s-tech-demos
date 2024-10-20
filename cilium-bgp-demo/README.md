@@ -14,7 +14,7 @@ One of the reasons i wanted to run `gobgpd` was simple because it's what drives 
 
 1. Create the `kind` cluster:
 
-```
+```bash
 kind create cluster --config=cilium-bgp-cluster.yaml --name cilium-bgp
 ```
 
@@ -22,37 +22,44 @@ _Note that the `kind` default subnets are: `10.244.0.0/16` (Pod CIDR) and `10.96
 
 2. Add the Cilium `helm` chart repo:
 
-```
+```bash
 helm repo add cilium https://helm.cilium.io/
 helm repo update
 ```
 
 3. Pre-load the `cilium` images into the `kind` cluster nodes:
 
-```
-docker pull quay.io/cilium/cilium:v1.16.0
-kind load docker-image quay.io/cilium/cilium:v1.16.0 --name cilium-bgp
+```bash
+docker pull quay.io/cilium/cilium:v1.16.3
+kind load docker-image quay.io/cilium/cilium:v1.16.3 --name cilium-bgp
 ```
 
 4. Install `cilium`:
 
-```
-helm upgrade --install cilium cilium/cilium --version 1.16.0 \
+```bash
+helm upgrade --install cilium cilium/cilium --version 1.16.3 \
    --namespace kube-system \
    --set image.pullPolicy=IfNotPresent \
    --set ipam.mode=kubernetes \
-   --set bgpControlPlane.enabled=true
+   --set bgpControlPlane.enabled=true \
+   --set operator.prometheus.enabled=true \
+   --set operator.grafana.dashboards.enabled=true \
+   --set operator.prometheus.serviceMonitor.enabled=true \
+   --set prometheus.serviceMonitor.enabled=true \
+   --set prometheus.enabled=true \
+   --set dashboards.enabled=true \
+   --set operator.dashboards.enabled=true
 ```
 
 5. Build the `gobgpd` (running `v3.30.0` of `GoBGP`) Docker image, using the provided `Dockerfile`:
 
-```
+```bash
 docker build . -t gobgpd:v3.30.0
 ```
 
 6. Start a `gobgpd` container in the same network as the `kind` cluster created above, default network is `kind`. We'll use a configuration that is easy to understand and follow, we'll also expose the gRPC port to be able to use the `gobgp` CLI to interact with the `gobgpd` process:
 
-```
+```bash
 docker run --rm --network kind -v $(pwd)/bgp-conf.yaml:/bgp-conf.yaml -p 50051:50051 --name gobgpd -it gobgpd:v3.30.0
 ```
 
@@ -60,13 +67,13 @@ _Note that the container is started in interactive mode so you'll see the logs f
 
 7. Apply the Cilium BGP peering policy and check the logs of `cilium-agent` and `gobgpd`. The nodes shall start to peer with `gobgpd` and announce their PodCIDRs. To verify that this has happened use the `gobgp` CLI tool to check the status of neighbors aswell as the routing information:
 
-```
+```bash
 kubectl apply -f cilium-bgp-configuration.yaml
 ```
 
 To check the status of `cilium-agent` BGP sessions you can do:
 
-```
+```bash
 for pod in $(kubectl get pods -n kube-system -l app.kubernetes.io/name=cilium-agent -o name)
 do
   kubectl -n kube-system exec $pod -c cilium-agent -- cilium bgp peers
@@ -78,23 +85,19 @@ _`gobgpd` exposes the gRPC endpoint is on `0.0.0.0:50051`, use the `gobgp` binar
 
 ## Monitoring
 
-1. Deploy `kube-prometheus-stack`, a bit overkill for a `kind` cluster but it will give you a head start:
+Deploy `kube-prometheus-stack`, a bit overkill for a `kind` cluster but it will give you a head start:
 
-```
-TODO add stuff here!
+```bash
+helm upgrade --install \
+   --namespace kube-prometheus-stack \
+   --create-namespace \
+   kube-prometheus-stack \
+   prometheus-community/kube-prometheus-stack \
+   -f kps-65.3.1-values.yaml \
+   --version 65.3.1
 ```
 
-1. Enable and deploy relevant monitoring in Cilium:
-
-```
-helm upgrade --install cilium cilium/cilium --version 1.16.0 \
-   --namespace kube-system \
-   --set image.pullPolicy=IfNotPresent \
-   --set ipam.mode=kubernetes \
-   --set bgpControlPlane.enabled=true \
-   --set operator.prometheus.enabled=true \
-   --set operator.grafana.dashboards.enabled=true
-```
+The changes in the provided `kube-prometheus-stack` values file are the bare-minimum needed to monitor Cilium.
 
 ## Try various failure scenarios
 
