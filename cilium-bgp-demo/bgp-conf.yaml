@@ -20,4 +20,3 @@ dynamic-neighbors:
   config:
     prefix: 172.19.0.0/16
     peer-group: cilium-nodes
-

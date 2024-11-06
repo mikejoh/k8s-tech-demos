@@ -42,13 +42,7 @@ helm upgrade --install cilium cilium/cilium --version 1.16.3 \
    --set image.pullPolicy=IfNotPresent \
    --set ipam.mode=kubernetes \
    --set bgpControlPlane.enabled=true \
-   --set operator.prometheus.enabled=true \
-   --set operator.grafana.dashboards.enabled=true \
-   --set operator.prometheus.serviceMonitor.enabled=true \
-   --set prometheus.serviceMonitor.enabled=true \
-   --set prometheus.enabled=true \
-   --set dashboards.enabled=true \
-   --set operator.dashboards.enabled=true
+   --set envoy.enabled=false
 ```
 
 5. Build the `gobgpd` (running `v3.30.0` of `GoBGP`) Docker image, using the provided `Dockerfile`:
@@ -83,9 +77,33 @@ done
 
 _`gobgpd` exposes the gRPC endpoint is on `0.0.0.0:50051`, use the `gobgp` binary to query the API._
 
+## Testing changes to the Cilium source code
+
+_I've been testing a bit with making changes to the BGP control metrics, to test these changes i did that in the same environment as we've created here. Using Cilium and gbgpd as a peer. If you're developing features for Cilium you should use the official development setup and install all components using Makefile targets._
+
+1. Build the Cilium container image:
+
+```bash
+ARCH=amd64 DOCKER_DEV_ACCOUNT=docker.io/mikejoh DOCKER_IMAGE_TAG=v1.16.3-state make dev-docker-image
+```
+
+2. Run `helm` with relevant flags to deploy your new image, make sure you change the `repository` and `tag` values to match your newly built image:
+
+```bash
+helm upgrade --install cilium cilium/cilium --version 1.16.3 \
+   --namespace kube-system \
+   --set image.pullPolicy=Always \
+   --set ipam.mode=kubernetes \
+   --set bgpControlPlane.enabled=true \
+   --set image.repository=docker.io/mikejoh/cilium-dev \
+   --set image.tag=v1.16.3-state \
+   --set image.useDigest=false \
+   --set image.pullPolicy=Always
+```
+
 ## Monitoring
 
-Deploy `kube-prometheus-stack`, a bit overkill for a `kind` cluster but it will give you a head start:
+1. Deploy `kube-prometheus-stack`, a bit overkill for a `kind` cluster but it will give you everything out-of-the-box:
 
 ```bash
 helm upgrade --install \
@@ -97,7 +115,28 @@ helm upgrade --install \
    --version 65.3.1
 ```
 
+2. Redeploy Cilium with the following settings:
+
+```bash
+helm upgrade --install cilium cilium/cilium --version 1.16.3 \
+   --reuse-values \
+   --set operator.prometheus.enabled=true \
+   --set operator.grafana.dashboards.enabled=true \
+   --set operator.prometheus.serviceMonitor.enabled=true \
+   --set operator.dashboards.enabled=true \
+   --set prometheus.serviceMonitor.enabled=true \
+   --set prometheus.enabled=true \
+   --set dashboards.enabled=true
+```
+
 The changes in the provided `kube-prometheus-stack` values file are the bare-minimum needed to monitor Cilium.
+
+To reach Prometheus and Grafana deployed in the `kind` cluster you can use port forwarding (if you don't have an ingress controller available to expose the Services):
+
+```
+kubectl port-forward -n kube-prometheus-stack svc/kube-prometheus-stack-prometheus 9090:9090
+kubectl port-forward -n kube-prometheus-stack svc/kube-prometheus-stack-grafana 8080:80
+```
 
 ## Try various failure scenarios
 
